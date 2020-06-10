@@ -43,22 +43,9 @@ module.exports = function(app) {
         // Write the new note to the JSON
         return readFileAsync('./db/db.json', 'utf8').then(jsonRes => {
             let json = JSON.parse(jsonRes);
-
-            // // This will check and see if the user is saving a new note or editing a previous one
-            // if (req.body.id) {
-            //     // If they are editing a previous note
-            //     // This will go and find the index of the previous note in the database and replace it
-            //     for (let i = 0; i < json.length; i++) {
-            //         if (json[i].id === note.id) {
-            //             var noteIndex = json.indexOf(json[i]);
-            //         }
-            //     }
-    
-            //     json[noteIndex] = note;
-
-            // } else {
+            
                 json.push(note);
-            // }
+           
 
             return writeFileAsync('./db/db.json', JSON.stringify(json)).then(function () {
                 return res.json(json);

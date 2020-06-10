@@ -41,15 +41,27 @@ function program() {
         return asyncReadFile("./db/db.json", "utf8").then(function(result) {
             let jsonFile = JSON.parse(result);
 
-            json.push(note);
+            if (req.body.id) {
+
+                for (let i=0; i > jsonFile.length; i++) {
+                    if (json[i].id === note.id) {
+                        var noteId = jsonFile.indexOf(jsonFile[i]);
+                    }
+                }
+                jsonFile[noteIndex] = note;
+            } else {
+                jsonFile.push(note);
+            }
 
             return asyncWriteFile("./db/db.json", JSON.stringify(result)).then(function() {
-                return res.json(jsonFile)
+                return res.jsonFile(jsonFile)
             });
         
-    });
+    }).catch(function(error) {
+        throw error;
     })
+    });
 
 
-    
+
 }

@@ -1,6 +1,10 @@
 //Dependencies
 var fs = require("fs");
 var util = require("util");
+var {v4: uuidv4} = require('uuid');
+
+//Creating ID variable
+var id = '';
 
 
 //Reading and writing files
@@ -21,10 +25,31 @@ function program() {
 
     //Post the notes
     app.post("/api/notes", function (req, res) {
+        //Need to make a unique id for the note, check if they don't already have one
+        if (req.body.id) {
+            id = req.body.id;
+        } else {
+            //Creates ids for the notes
+            id = uuidv4();
+        };
         var note = {
             title: req.body.title,
             text: req.body.text,
-            id: id;
-        }
+            id: id
+        };
+
+        return asyncReadFile("./db/db.json", "utf8").then(function(result) {
+            let jsonFile = JSON.parse(result);
+
+            json.push(note);
+
+            return asyncWriteFile("./db/db.json", JSON.stringify(result)).then(function() {
+                return res.json(jsonFile)
+            });
+        
+    });
     })
+
+
+    
 }

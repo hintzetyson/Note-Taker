@@ -62,6 +62,34 @@ function program() {
     })
     });
 
+    //Delete function
+    app.delete("/api/notes/:id", function (req,res) {
+
+        let deleteId = req.params.id;
+
+        //Read the file
+        asyncReadFile("./db/db.json", "utf8").then(function(file) {
+            //Parse the file
+            let deleteJson = JSON.parse(file);
+
+
+            //Find the note with the matching number
+            for (let i = 0; i < deleteJson.length; i++) {
+                if (deleteJson[i].id === deleteId) {
+                    var deleteThisNote = deleteJson[i].id
+                }
+            }
+
+            //Take that note out
+            let newFile = deleteJson.filter(function(item) {
+                return item.id !== deleteThisNote;
+            });
+
+            //Overwirte the saved JSON
+            fs.asyncWriteFile("./db/db.json", JSON.stringify(newFile));
+        })
+    })
+
 
 
 }

@@ -1,97 +1,100 @@
-//Dependencies
-var fs = require("fs");
-var util = require("util");
+// Dependencies
+var fs = require('fs');
 var {v4: uuidv4} = require('uuid');
+const util = require("util");
 
-//Creating ID variable
+// Reading and writing variables
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+
+// ID
 var id = '';
 
-
-//Reading and writing files
-const asyncReadFile = util.promisify(fs.readFile);
-const asyncWriteFile = util.promisify(fs.writeFile);
-
-//App function
-function program() {
-
-    //Get the notes
-    app.get("api/notes", function(req, res ) {
-        asyncReadFile("./db/db.json", "utf8").then(function(result) {
-            let item = JSON.parse(result);
+// app function
+module.exports = function(app) {
+    // Get the json
+    app.get('/api/notes', function(req, res) {
+        readFileAsync('./db/db.json', 'utf8').then(i => {
+            let item = JSON.parse(i);
 
             return res.json(item)
         })
-        });
+    });
 
-    //Post the notes
-    app.post("/api/notes", function (req, res) {
-        //Need to make a unique id for the note, check if they don't already have one
+    // Post to the JSON api
+    app.post('/api/notes', function(req, res) {
+
+        // If the req comes back with an id then id will be set to that id
         if (req.body.id) {
             id = req.body.id;
         } else {
-            //Creates ids for the notes
+
+            // Create a new ID
             id = uuidv4();
-        };
+        }
+
+        // Save the note
         var note = {
             title: req.body.title,
             text: req.body.text,
             id: id
         };
 
-        return asyncReadFile("./db/db.json", "utf8").then(function(result) {
-            let jsonFile = JSON.parse(result);
+        // Write the new note to the JSON
+        return readFileAsync('./db/db.json', 'utf8').then(jsonRes => {
+            let json = JSON.parse(jsonRes);
 
-            if (req.body.id) {
+            // // This will check and see if the user is saving a new note or editing a previous one
+            // if (req.body.id) {
+            //     // If they are editing a previous note
+            //     // This will go and find the index of the previous note in the database and replace it
+            //     for (let i = 0; i < json.length; i++) {
+            //         if (json[i].id === note.id) {
+            //             var noteIndex = json.indexOf(json[i]);
+            //         }
+            //     }
+    
+            //     json[noteIndex] = note;
 
-                for (let i=0; i > jsonFile.length; i++) {
-                    if (json[i].id === note.id) {
-                        var noteId = jsonFile.indexOf(jsonFile[i]);
-                    }
-                }
-                jsonFile[noteIndex] = note;
-            } else {
-                jsonFile.push(note);
-            }
+            // } else {
+                json.push(note);
+            // }
 
-            return asyncWriteFile("./db/db.json", JSON.stringify(result)).then(function() {
-                return res.jsonFile(jsonFile)
+            return writeFileAsync('./db/db.json', JSON.stringify(json)).then(function () {
+                return res.json(json);
             });
-        
-    }).catch(function(error) {
-        throw error;
-    })
+        }).catch(error => {
+            throw error;
+        });
     });
 
-    //Delete function
-    app.delete("/api/notes/:id", function (req,res) {
+    // Delete a note
+    app.delete('/api/notes/:id', function(req, res) {
+        // Grab that note
+        let idToDelete = req.params.id;
 
-        let deleteId = req.params.id;
+        // Read the database file
+        readFileAsync('./db/db.json', 'utf8').then(file => {
+            // Parse the file into JSON
+            let returnedJson = JSON.parse(file);
 
-        //Read the file
-        asyncReadFile("./db/db.json", "utf8").then(function(file) {
-            //Parse the file
-            let deleteJson = JSON.parse(file);
-
-
-            //Find the note with the matching number
-            for (let i = 0; i < deleteJson.length; i++) {
-                if (deleteJson[i].id === deleteId) {
-                    var deleteThisNote = deleteJson[i].id
+            // Find the one with the matching ID
+            for (let i = 0; i < returnedJson.length; i++) {
+                if (returnedJson[i].id === idToDelete) {
+                    var deleteNote = returnedJson[i].id;
                 }
             }
 
-            //Take that note out
-            let newFile = deleteJson.filter(function(item) {
-                return item.id !== deleteThisNote;
+            // Filter out the note with the matching id
+            let newJson = returnedJson.filter(function(item) {
+                return item.id !== deleteNote;
             });
 
-            //Overwirte the saved JSON
-            fs.asyncWriteFile("./db/db.json", JSON.stringify(newFile));
+            // Overwrite the saved JSON
+            fs.writeFileSync('./db/db.json', JSON.stringify(newJson));
+
+            // Send back status 200
+            res.json({ok: true});
         })
     })
-
-
-
 }
-
-module.exports = program();

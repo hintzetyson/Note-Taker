@@ -4,11 +4,11 @@ html, body {
   padding: 0;
 }
 
-.save-note {
+.save-note, .edit-note {
   display: none;
 }
 
-.icons i {
+i {
   margin-left: 15px;
   margin-right: 15px;
   font-size: 1.5rem;
@@ -32,6 +32,22 @@ html, body {
   height: 50px;
   margin-top: 13px;
   font-size: 3rem;
+}
+
+.navbar {
+  background-color: #dab437 !important;
+}
+
+.navbar-brand, .display-4 {
+  font-family: 'Caveat', cursive;
+}
+
+.navbar-brand {
+  font-size: 30px;
+}
+
+.fa-save::before, .fa-plus::before {
+  color: white;
 }
 
 .note-title:read-only, .note-textarea:read-only {
